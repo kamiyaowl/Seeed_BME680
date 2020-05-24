@@ -179,14 +179,14 @@ int8_t Seeed_BME680::read_sensor_data(void) {
 */
 int8_t iic_read(uint8_t dev_id, uint8_t reg_addr, uint8_t* reg_data, uint16_t len) {
     int32_t i = 0;
-    Wire.beginTransmission((uint8_t)dev_id);
-    Wire.write((uint8_t)reg_addr);
-    Wire.endTransmission();
-    if (len != Wire.requestFrom((uint8_t)dev_id, (byte)len)) {
+    SEEED_BM680_WIRE.beginTransmission((uint8_t)dev_id);
+    SEEED_BM680_WIRE.write((uint8_t)reg_addr);
+    SEEED_BM680_WIRE.endTransmission();
+    if (len != SEEED_BM680_WIRE.requestFrom((uint8_t)dev_id, (byte)len)) {
         return 1;
     }
     for (i = 0; i < len; i++) {
-        reg_data[i] = (uint8_t)Wire.read();
+        reg_data[i] = (uint8_t)SEEED_BM680_WIRE.read();
     }
     return 0;
 }
@@ -200,13 +200,13 @@ int8_t iic_read(uint8_t dev_id, uint8_t reg_addr, uint8_t* reg_data, uint16_t le
 */
 int8_t iic_write(uint8_t dev_id, uint8_t reg_addr, uint8_t* reg_data, uint16_t len) {
     int32_t i = 0;
-    Wire.beginTransmission((uint8_t)dev_id);
-    Wire.write((uint8_t)reg_addr);
+    SEEED_BM680_WIRE.beginTransmission((uint8_t)dev_id);
+    SEEED_BM680_WIRE.write((uint8_t)reg_addr);
 
     for (i = 0; i < len; i++) {
-        Wire.write(reg_data[i]);
+        SEEED_BM680_WIRE.write(reg_data[i]);
     }
-    Wire.endTransmission();
+    SEEED_BM680_WIRE.endTransmission();
     return 0;
 }
 
@@ -217,7 +217,7 @@ int8_t iic_write(uint8_t dev_id, uint8_t reg_addr, uint8_t* reg_data, uint16_t l
 */
 static uint8_t spi_transfer(uint8_t x) {
     if (0 == user_define_spi_pinmap_flag) {
-        return SPI.transfer(x);
+        return SEEED_BM680_SPI.transfer(x);
     }
     //  Serial.println(spi_pinmap_cs);
     uint8_t reply = 0;
@@ -246,7 +246,7 @@ static int8_t spi_read(uint8_t cspin, uint8_t reg_addr, uint8_t* reg_data, uint1
     digitalWrite(cspin, LOW);
 
     if (0 == user_define_spi_pinmap_flag) {
-        SPI.beginTransaction(SPISettings(BME680_DEFAULT_SPIFREQ, MSBFIRST, SPI_MODE0));
+        SEEED_BM680_SPI.beginTransaction(SPISettings(BME680_DEFAULT_SPIFREQ, MSBFIRST, SPI_MODE0));
     }
 
     spi_transfer(reg_addr);
@@ -255,7 +255,7 @@ static int8_t spi_read(uint8_t cspin, uint8_t reg_addr, uint8_t* reg_data, uint1
         reg_data[i] = spi_transfer(0x00);
     }
     if (0 == user_define_spi_pinmap_flag) {
-        SPI.endTransaction();
+        SEEED_BM680_SPI.endTransaction();
     }
 
     digitalWrite(cspin, HIGH);
@@ -275,7 +275,7 @@ static int8_t spi_write(uint8_t cspin, uint8_t reg_addr, uint8_t* reg_data, uint
     uint32_t i = 0;
     digitalWrite(cspin, LOW);
     if (0 == user_define_spi_pinmap_flag) {
-        SPI.beginTransaction(SPISettings(BME680_DEFAULT_SPIFREQ, MSBFIRST, SPI_MODE0));
+        SEEED_BM680_SPI.beginTransaction(SPISettings(BME680_DEFAULT_SPIFREQ, MSBFIRST, SPI_MODE0));
     }
 
     spi_transfer(reg_addr);
@@ -285,7 +285,7 @@ static int8_t spi_write(uint8_t cspin, uint8_t reg_addr, uint8_t* reg_data, uint
     }
 
     if (0 == user_define_spi_pinmap_flag) {
-        SPI.endTransaction();
+        SEEED_BM680_SPI.endTransaction();
     }
     digitalWrite(cspin, HIGH);
     return 0;
@@ -309,7 +309,7 @@ bool Seeed_BME680::init() {
     /*User specifies IIC protocol in constructor.*/
 
     if (sensor_param.intf == BME680_I2C_INTF) {
-        Wire.begin();
+        SEEED_BM680_WIRE.begin();
         sensor_param.read = iic_read;
         sensor_param.write = iic_write;
     }
@@ -321,7 +321,7 @@ bool Seeed_BME680::init() {
 
 
         if (0 == user_define_spi_pinmap_flag) {
-            SPI.begin();
+            SEEED_BM680_SPI.begin();
         } else {
             pinMode(spi_pinmap_sck, OUTPUT);
             pinMode(spi_pinmap_mosi, OUTPUT);

@@ -23,6 +23,15 @@
 #include "bme680.h"
 
 
+/* If there is no user specification, use the following definition */
+#ifndef SEEED_BM680_WIRE
+#define SEEED_BM680_WIRE (Wire)
+#endif
+
+#ifndef SEEED_BM680_SPI
+#define SEEED_BM680_SPI (SPI)
+#endif
+
 
 #define BME680_DEFAULT_SPIFREQ               (1000000)
 
